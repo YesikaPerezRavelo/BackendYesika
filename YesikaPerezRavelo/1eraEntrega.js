@@ -1,4 +1,5 @@
 //Se creará una instancia de la clase “ProductManager”
+//Se llamará “getProducts” recién creada la instancia, debe devolver un arreglo vacío []
 
 class ProductManager {
   constructor() {
@@ -9,21 +10,19 @@ class ProductManager {
     return Math.random().toString(36).substr(2, 9);
   }
 
-  //Se llamará “getProducts” recién creada la instancia, debe devolver un arreglo vacío []
-
   getProducts() {
     return this.products;
   }
 
   addProduct({ title, description, price, thumbnail, code, stock }) {
     // Verificar si el código ya existe
-    const codeExists = this.products.some((product) => product.code === code);
+    const existingProduct = this.products.find(
+      (product) => product.code === code
+    );
 
-    if (codeExists) {
+    if (existingProduct) {
       throw new Error("Código de producto repetido");
     }
-
-    // Se llamará al método “addProduct” con los campos: title: “producto prueba” description:”Este es un producto prueba” price:200, thumbnail:”Sin imagen”code:”abc123”,stock:25
 
     const id = this.generateId();
     const newProduct = {
@@ -51,10 +50,13 @@ class ProductManager {
   }
 }
 
-// Ejemplo de uso:
+// Crear instancia de ProductManager
 const manager = new ProductManager();
+
+// Obtener productos iniciales (debería ser un arreglo vacío)
 console.log(manager.getProducts()); // []
 
+// Agregar un nuevo producto
 const newProduct = manager.addProduct({
   title: "producto prueba",
   description: "Este es un producto prueba",
@@ -64,9 +66,10 @@ const newProduct = manager.addProduct({
   stock: 25,
 });
 
+// Obtener productos después de agregar (debería incluir el nuevo producto)
 console.log(manager.getProducts()); // [newProduct]
 
-// Intentar agregar producto con el mismo código
+// Intentar agregar un producto con el mismo código (debería arrojar un error)
 try {
   manager.addProduct({
     title: "producto prueba",
@@ -80,6 +83,6 @@ try {
   console.error(error.message); // Código de producto repetido
 }
 
-// Obtener producto por ID
+// Obtener un producto por su ID (debería devolver el nuevo producto)
 const productId = newProduct.id;
 console.log(manager.getProductById(productId)); // newProduct
