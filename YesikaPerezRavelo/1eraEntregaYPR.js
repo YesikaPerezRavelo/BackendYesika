@@ -102,3 +102,16 @@ try {
 } catch (error) {
   console.error(error.message);
 }
+
+try {
+  existingProduct.addProduct(
+    "Producto de Prueba",
+    "Este es un producto de prueba",
+    200,
+    "Sin imagen",
+    "abc123",
+    25
+  );
+} catch (error) {
+  console.error(error.message);
+}
