@@ -1,26 +1,16 @@
-//- Se creará una instancia de la clase “ProductManager”
-
-//Se llamará el método “getProducts” nuevamente, esta vez debe aparecer el producto recién agregado
-
 class ProductManager {
   constructor() {
     this.products = [];
+    this.idCounter = 0;
   }
-
-  //El objeto debe agregarse satisfactoriamente con un id generado automáticamente SIN REPETIRSE
-  //The static keyword defines a static method or field for a class, or a static initialization block,this will help to increase the ids from 0 to ...as many products we have
-
-  static id = 0;
 
   addProduct(title, description, price, thumbnail, code, stock) {
     for (let i = 0; i < this.products.length; i++) {
       if (this.products[i].code === code) {
-        console.log(`El codigo ${code} esta repetido`);
-        break;
+        throw new Error(`El código ${code} ya existe`);
       }
     }
 
-    //required fields
     const newProduct = {
       title,
       description,
@@ -30,21 +20,19 @@ class ProductManager {
       stock,
     };
 
-    if (!Object.values(newProduct).includes(undefined)) {
-      //For new ID
-      ProductManager.id++;
-
-      this.products.push({
-        ...newProduct,
-
-        id: ProductManager.id,
-      });
-    } else {
-      console.log("Todos los campos son requeridos");
+    if (!Object.values(newProduct).every((value) => value !== undefined)) {
+      throw new Error("Todos los campos son requeridos");
     }
+
+    this.idCounter++;
+
+    this.products.push({
+      ...newProduct,
+      id: this.idCounter,
+    });
   }
 
-  getProduct() {
+  getProducts() {
     return this.products;
   }
 
@@ -52,31 +40,21 @@ class ProductManager {
     return this.products.find((existingProduct) => existingProduct.id === id);
   }
 
-  //Se evaluará que getProductById devuelva error si no encuentra el producto o el producto en caso de encontrarlo
-
-  //create FoundIt to simplify fuction
-  //Make this into a conditional (ternary) operator is the only JavaScript operator that takes three operands: a condition followed by a question mark ( ? ), then an expression to execute if the condition is truthy followed by a colon ( : ), and finally the expression to execute if the condition is falsy.
   getProductById(id) {
-    !this.FoundIt(id)
-      ? console.log("No tenemos este servicio")
-      : console.log(this.FoundIt(id));
+    const product = this.FoundIt(id);
+
+    if (!product) {
+      throw new Error("No tenemos este servicio");
+    }
+
+    console.log(`Producto encontrado: ${JSON.stringify(product)}`);
+    return product;
   }
 }
 
-//Testing
-
 const existingProduct = new ProductManager();
 
-//-Se llamará “getProducts” recién creada la instancia, debe devolver un arreglo vacío []
-console.log(existingProduct.getProduct());
-
-//-Se llamará al método “addProduct” con los campos:
-//title: “producto prueba”
-//description:”Este es un producto prueba”
-//price:200,
-//thumbnail:”Sin imagen”
-//code:”abc123”,
-//stock:25
+console.log(existingProduct.getProducts());
 
 existingProduct.addProduct(
   "Producto de Prueba",
@@ -89,34 +67,38 @@ existingProduct.addProduct(
 
 existingProduct.addProduct(
   "Entrenamientos Personalizados",
-  "Me dedicó a enseñar todo tipo de técnicas de entrenamiento, yoga, elongación y relajación. Mi meta es que puedas disfrutar de cada una de ellas",
+  "Me dedico a enseñar todo tipo de técnicas de entrenamiento, yoga, elongación y relajación. Mi meta es que puedas disfrutar de cada una de ellas",
   10000,
   "https://drive.google.com/uc?export=view&id=1VjvOYHQoR7Qpv9mwdKIcw9dVipPcvNbx",
   "abc124",
   5
 );
 
-//check availability by Id
-console.log(existingProduct.getProduct());
+console.log(existingProduct.getProducts());
 
-console.log(existingProduct.getProductById(1));
+try {
+  console.log(existingProduct.getProductById(1));
+  console.log(existingProduct.getProductById(3));
 
-console.log(existingProduct.getProductById(3));
+  existingProduct.addProduct(
+    "Producto de Prueba2",
+    "Este es un producto de prueba2",
+    200,
+    "Sin imagen2",
+    "abc123",
+    25
+  );
+} catch (error) {
+  console.error(error.message);
+}
 
-//Make an error on purpose because the code is the same as the first product
-existingProduct.addProduct(
-  "Producto de Prueba2",
-  "Este es un producto de prueba2",
-  200,
-  "Sin imagen2",
-  "abc123",
-  25
-);
-
-//Make an error on purpose when the object doesn´t have all of the fields
-existingProduct.addProduct(
-  "Producto de Prueba3",
-  "Este es un producto de prueba3",
-  200,
-  "Sin imagen2"
-);
+try {
+  existingProduct.addProduct(
+    "Producto de Prueba3",
+    "Este es un producto de prueba3",
+    200,
+    "Sin imagen2"
+  );
+} catch (error) {
+  console.error(error.message);
+}
