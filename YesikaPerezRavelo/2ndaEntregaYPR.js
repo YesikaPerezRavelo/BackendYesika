@@ -35,7 +35,7 @@ class ProductsManager {
     };
 
     this.products.push(addNewProduct);
-    console.log("Product agregado: ", addNewProduct);
+    console.log("Product agregado:", addNewProduct);
 
     await fs.promises.writeFile(
       this.path,
@@ -47,11 +47,10 @@ class ProductsManager {
     try {
       const readFile = await fs.promises.readFile(this.path, "utf-8");
       const productsObj = JSON.parse(readFile);
-      console.log("Listado de productos: ", productsObj);
       return productsObj;
     } catch (error) {
       console.error("Error al obtener productos", error);
-      return null;
+      return;
     }
   }
 
@@ -60,14 +59,14 @@ class ProductsManager {
       const productId = parseInt(id);
       const product = this.products.find((product) => product.id === productId);
       if (product) {
-        console.log("Producto: ", product);
+        console.log(`El producto con el id ${id} fue encontrado:`, product);
         return product;
       } else {
-        console.error("Producto no encontrado");
+        console.error(`El producto con id ${id} no fue encontrado`);
         return null;
       }
     } catch (error) {
-      console.error("Error buscando el producto", error);
+      console.error("Error buscando producto", error);
       return null;
     }
   }
@@ -86,7 +85,40 @@ class ProductsManager {
       this.path,
       JSON.stringify(this.products, null, "\t")
     );
-    console.log(`El producto del id ${id} fue borrado correctamente`);
+    console.log(`El producto con el id ${id} fue borrado correctamente`);
+  }
+
+  async updateProduct(
+    id,
+    { title, description, price, thumbnail, code, stock }
+  ) {
+    const findId = this.products.findIndex((product) => product.id === id);
+    if (findId === -1) return console.error("Not found");
+
+    const updateProduct = {
+      ...this.products[findId],
+      title,
+      description,
+      price,
+      thumbnail,
+      code,
+      stock,
+    };
+
+    this.products[findId] = updateProduct;
+
+    try {
+      // Introduce a delay using setTimeout
+      setTimeout(async () => {
+        await fs.promises.writeFile(
+          this.path,
+          JSON.stringify(this.products, null, "\t")
+        );
+        console.log("Product updated:", updateProduct);
+      }, 200); // Adjust the delay time as needed
+    } catch (error) {
+      console.error("Error writing to file", error);
+    }
   }
 }
 
@@ -117,3 +149,12 @@ products.getProductById(2);
 products.getProductById(6);
 
 products.deleteProduct(5);
+
+products.updateProduct(4, {
+  title: "Producto4",
+  description: "Descripcion4 ACTUALIZADA",
+  price: 800,
+  thumbnail: "Imagen4",
+  code: "abc124",
+  stock: 30,
+});
