@@ -93,7 +93,7 @@ class ProductsManager {
     { title, description, price, thumbnail, code, stock }
   ) {
     const findId = this.products.findIndex((product) => product.id === id);
-    if (findId === -1) return console.error("Not found");
+    if (findId === -1) return console.error("No encontrado");
 
     const updateProduct = {
       ...this.products[findId],
@@ -108,16 +108,15 @@ class ProductsManager {
     this.products[findId] = updateProduct;
 
     try {
-      // Introduce a delay using setTimeout
       setTimeout(async () => {
         await fs.promises.writeFile(
           this.path,
           JSON.stringify(this.products, null, "\t")
         );
-        console.log("Product updated:", updateProduct);
-      }, 200); // Adjust the delay time as needed
+        console.log("El producto actualizado correctamente:", updateProduct);
+      }, 200);
     } catch (error) {
-      console.error("Error writing to file", error);
+      console.error("Error escribiendo archivo", error);
     }
   }
 }
