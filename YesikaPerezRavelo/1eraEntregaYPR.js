@@ -115,3 +115,17 @@ try {
 } catch (error) {
   console.error(error.message);
 }
+
+const fs = require("fs");
+
+const readPackageJson = async () => {
+  let packageJson = await fs.promises.readFile("package.json", "utf-8");
+
+  console.log(packageJson.name); //string
+
+  packageJson = JSON.parse(packageJson);
+
+  console.log(packageJson.name); //objeto
+};
+
+readPackageJson();
