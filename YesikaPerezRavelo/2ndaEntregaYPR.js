@@ -1,89 +1,119 @@
-import { promises as fs } from "fs";
+const fs = require("fs");
 
-class ProductManager {
+class ProductsManager {
   constructor() {
-    this.patch = "./products.txt";
-    this.products = [];
+    this.path = "products.json";
+    try {
+      const data = fs.readFileSync(this.path, "utf-8");
+      this.products = JSON.parse(data);
+    } catch (error) {
+      this.products = [];
+    }
+    this.id = 0;
   }
 
-  static id = 0;
+  data() {
+    console.log(this.products);
+  }
 
-  addProduct = async (title, description, price, thumbnail, code, stock) => {
-    ProductManager.id++;
-    let newProduct = {
+  async addProduct(title, description, price, thumbnail, code, stock) {
+    const maxId = this.products.reduce(
+      (max, product) => (product.id > max ? product.id : max),
+      0
+    );
+
+    const newId = maxId + 1;
+
+    const addNewProduct = {
+      id: newId,
       title,
       description,
       price,
       thumbnail,
       code,
       stock,
-      id: ProductManager.id,
     };
 
-    // console.log(newProduct);
+    this.products.push(addNewProduct);
+    console.log("Product agregado: ", addNewProduct);
 
-    this.products.push(newProduct);
-
-    await fs.writeFile(this.patch, JSON.stringify(this.products));
-  };
-
-  productsReadFile = async () => {
-    let responseObj = await fs.readFile(this.patch, "utf-8");
-    return JSON.parse(responseObj);
-  };
-
-  getProducts = async () => {
-    let responseReadFile = await this.productsReadFile();
-    return console.log(responseReadFile);
-  };
-
-  getProductsById = async (id) => {
-    let responseFilterId = await this.productsReadFile();
-    if (!responseFilterId.find((product) => product.id === id)) {
-      console.log("Producto no encontrado");
-    } else {
-      console.log(responseFilterId.find((product) => product.id === id));
-    }
-  };
-
-  deleteProductsById = async (id) => {
-    let responseFilterId = await this.productsReadFile();
-    let productFilter = responseFilterId.filter(
-      (products) => products.id != id
+    await fs.promises.writeFile(
+      this.path,
+      JSON.stringify(this.products, null, "\t")
     );
-    await fs.writeFile(this.patch, JSON.stringify(productFilter));
-    console.log("Producto eliminado");
-  };
+  }
 
-  updateProducts = async ({ id, ...product }) => {
-    await this.deleteProductsById(id);
-    let lastProduct = await this.productsReadFile();
+  async getProducts() {
+    try {
+      const readFile = await fs.promises.readFile(this.path, "utf-8");
+      const productsObj = JSON.parse(readFile);
+      console.log("Listado de productos: ", productsObj);
+      return productsObj;
+    } catch (error) {
+      console.error("Error al obtener productos", error);
+      return null;
+    }
+  }
 
-    let productModification = [{ ...product, id }, ...lastProduct];
-    await fs.writeFile(this.patch, JSON.stringify(productModification));
-  };
+  async getProductById(id) {
+    try {
+      const productId = parseInt(id);
+      const product = this.products.find((product) => product.id === productId);
+      if (product) {
+        console.log("Producto: ", product);
+        return product;
+      } else {
+        console.error("Producto no encontrado");
+        return null;
+      }
+    } catch (error) {
+      console.error("Error buscando el producto", error);
+      return null;
+    }
+  }
+
+  async deleteProduct(id) {
+    const deleteForId = this.products.findIndex((product) => product.id === id);
+    if (deleteForId === -1) {
+      console.error("Producto no encontrado");
+      return;
+    }
+    this.products.splice(deleteForId, 1);
+
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
+    await fs.promises.writeFile(
+      this.path,
+      JSON.stringify(this.products, null, "\t")
+    );
+    console.log(`El producto del id ${id} fue borrado correctamente`);
+  }
 }
 
-const products = new ProductManager();
+const products = new ProductsManager();
+products.data();
 
-// products.addProduct("Producto1", "Descripcion1", 200, "Imagen1", "abc123", 25);
+products.addProduct(
+  "Titulo4",
+  "Description4",
+  "400",
+  "Imagen4",
+  "abc124",
+  "40"
+);
 
-// products.addProduct("Producto2", "Descripcion2", 100, "Imagen2", "abc124", 20);
-
-// products.addProduct("Producto3", "Descripcion3", 300, "Imagen3", "abc125", 30);
+products.addProduct(
+  "Titulo5",
+  "Description5",
+  "500",
+  "Imagen5",
+  "abc125",
+  "50"
+);
 
 products.getProducts();
 
-products.getProductsById(4);
+products.getProductById(2);
+products.getProductById(6);
 
-products.deleteProductsById(2);
-
-products.updateProducts({
-  title: "Producto3",
-  description: "Descripcion3",
-  price: 800,
-  thumbnail: "Imagen3",
-  code: "abc125",
-  stock: 30,
-  id: 3,
-});
+products.deleteProduct(5);
