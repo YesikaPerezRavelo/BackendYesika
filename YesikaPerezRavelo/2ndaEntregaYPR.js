@@ -72,11 +72,11 @@ const products = new ProductManager();
 
 // products.addProduct("Producto3", "Descripcion3", 300, "Imagen3", "abc125", 30);
 
-// products.getProducts();
+products.getProducts();
 
-// products.getProductsById(4);
+products.getProductsById(4);
 
-// products.deleteProductsById(2);
+products.deleteProductsById(2);
 
 products.updateProducts({
   title: "Producto3",
